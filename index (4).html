@@ -1,0 +1,2386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SIP Abacus — Centre Dashboard</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
+<meta name="theme-color" content="#EF7A1F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SIP Abacus">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #2B2118;
+    --ink-soft: #8A7A6D;
+    --line: #EEE0D0;
+    --panel: #ffffff;
+    --bg: #FBF4EA;
+    --accent: #EF7A1F;
+    --accent-dark: #C85A0F;
+    --accent-soft: #FDEBD9;
+    --gold: #F2AE1F;
+    --good: #2F8F5B;
+    --good-bg: #E8F6EE;
+    --bad: #C43B3B;
+    --bad-bg: #FBEAEA;
+    --pending: var(--accent-dark);
+    --pending-bg: var(--accent-soft);
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { overscroll-behavior-y: contain; }
+  body {
+    margin: 0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 8% 12%, rgba(239,122,31,0.06) 0, transparent 40%),
+      radial-gradient(circle at 92% 88%, rgba(242,174,31,0.08) 0, transparent 40%);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    overscroll-behavior-y: contain;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  input, textarea, .feedback-text, .booking-detail, .student-row .names {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    max-width: 520px;
+    width: 100%;
+    padding: 32px;
+    box-shadow: 0 1px 3px rgba(43,33,24,0.05), 0 10px 28px rgba(43,33,24,0.06);
+  }
+  h1 {
+    font-family: 'Baloo 2', 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .subtitle {
+    color: var(--ink-soft);
+    font-size: 13.5px;
+    margin: 0 0 24px;
+    line-height: 1.5;
+  }
+  label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+  .field { margin-bottom: 18px; }
+  .row { display: flex; gap: 14px; }
+  .row .field { flex: 1; }
+  select, input[type="date"], input[type="time"], input[type="text"], input[type="password"] {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    font-size: 16px;
+    color: var(--ink);
+    background: #fff;
+    font-family: inherit;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  select:hover, input:hover { border-color: #DCC7AD; }
+  select:focus, input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .url-field-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .url-field-icon {
+    position: absolute;
+    left: 12px;
+    font-size: 13px;
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  input.url-field {
+    padding-left: 34px;
+    font-family: 'SF Mono', 'Consolas', monospace;
+    font-size: 13px;
+    color: var(--accent-dark);
+    text-overflow: ellipsis;
+  }
+  @media (max-width: 700px) {
+    input.url-field { font-size: 16px; }
+  }
+  input.url-field::placeholder {
+    color: #c9b9a4;
+    font-family: inherit;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--line);
+    margin: 22px 0;
+  }
+  .students-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .students-summary p {
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+  }
+  .students-summary strong { color: var(--ink); }
+  .list-controls-buttons { display: flex; gap: 8px; flex-shrink: 0; }
+  @media (max-width: 420px) {
+    .list-controls-row {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+    }
+    .list-controls-buttons { width: 100%; }
+    .list-controls-buttons .btn { flex: 1; }
+    .feedback-controls-row {
+      flex-wrap: wrap;
+    }
+    .feedback-controls-row .field { flex-basis: 100%; }
+    .feedback-controls-row .btn { flex: 1; margin-bottom: 0 !important; }
+  }
+  .btn {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 10px 18px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn-secondary {
+    background: var(--accent-soft);
+    color: var(--accent-dark);
+    border-color: var(--accent-soft);
+    white-space: nowrap;
+  }
+  .btn-secondary:hover { background: #f6dcc0; }
+  .btn-toggle-active {
+    background: var(--accent) !important;
+    color: #fff !important;
+    border-color: var(--accent) !important;
+  }
+  .btn-toggle-active:hover { background: var(--accent-dark) !important; }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    width: 100%;
+    padding: 12px 18px;
+    font-size: 15px;
+    margin-top: 22px;
+  }
+  .btn-primary:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(239,122,31,0.25); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled {
+    background: #a9b7c2;
+    cursor: not-allowed;
+  }
+  .btn.loading {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+  }
+  .btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+  .status {
+    margin-top: 14px;
+    padding: 11px 14px 11px 16px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    display: none;
+    align-items: center;
+    gap: 9px;
+    border-left: 3px solid transparent;
+    animation: statusIn 0.2s ease;
+  }
+  @keyframes statusIn {
+    from { opacity: 0; transform: translateY(-3px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .status.show { display: flex; }
+  .status::before { font-size: 14px; flex-shrink: 0; }
+  .status.ok { background: var(--good-bg); color: var(--good); border-left-color: var(--good); }
+  .status.ok::before { content: '✓'; font-weight: 700; }
+  .status.err { background: var(--bad-bg); color: var(--bad); border-left-color: var(--bad); }
+  .status.err::before { content: '⚠'; }
+  .status.pending { background: var(--accent-soft); color: var(--accent-dark); border-left-color: var(--accent); }
+  .status.pending::before {
+    content: '';
+    width: 13px;
+    height: 13px;
+    border: 2px solid var(--accent-dark);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Modal */
+  .overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(20,30,40,0.45);
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    padding: 20px;
+  }
+  .overlay.show { display: flex; }
+  .modal {
+    background: #fff;
+    border-radius: var(--radius);
+    width: 100%;
+    max-width: 420px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  }
+  .modal-head {
+    padding: 18px 20px 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .modal-head h2 { margin: 0 0 4px; font-size: 16px; }
+  .modal-head p { margin: 0; font-size: 12.5px; color: var(--ink-soft); }
+  .search-box {
+    margin: 12px 20px 0;
+    position: relative;
+  }
+  .search-box input {
+    width: 100%;
+  }
+  .search-box::before {
+    content: '🔍';
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(calc(-50% + 6px));
+    font-size: 13px;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .search-box input { padding-left: 36px; }
+  .modal-list {
+    overflow-y: auto;
+    padding: 8px 12px;
+    flex: 1;
+  }
+  .student-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .student-row:hover { background: var(--accent-soft); }
+  .student-row input { accent-color: var(--accent); width: 16px; height: 16px; }
+  .student-row .names { font-size: 14px; }
+  .student-row .names .student { font-weight: 600; }
+  .student-row .names .parent { color: var(--ink-soft); font-size: 12px; }
+  .modal-foot {
+    padding: 14px 20px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+  .modal-foot .count { font-size: 12.5px; color: var(--ink-soft); }
+  .empty-state {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 13px;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Login screen */
+  .login-screen {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 60px;
+  }
+  .login-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    max-width: 380px;
+    width: 100%;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(43,33,24,0.06), 0 20px 48px rgba(239,122,31,0.12);
+    animation: loginCardIn 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes loginCardIn {
+    from { opacity: 0; transform: translateY(14px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .login-topbar {
+    height: 6px;
+    background: linear-gradient(90deg, var(--gold), var(--accent) 50%, var(--accent-dark));
+  }
+  .login-inner {
+    padding: 36px 34px 28px;
+  }
+  .login-logo-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 18px;
+  }
+  .login-logo {
+    display: block;
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px var(--accent-soft), 0 6px 18px rgba(239,122,31,0.3);
+  }
+  .login-title {
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 800;
+    font-size: 26px;
+    text-align: center;
+    margin: 0 0 4px;
+    color: var(--ink);
+  }
+  .login-sub {
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin: 0;
+    letter-spacing: 0.01em;
+  }
+  .login-bead-divider {
+    display: flex;
+    justify-content: center;
+    gap: 7px;
+    margin: 20px 0 22px;
+  }
+  .bead-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--line);
+  }
+  .bead-dot.lit {
+    background: var(--gold);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .login-instruction {
+    text-align: center;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    margin: 0 0 18px;
+    font-weight: 500;
+  }
+  .pin-boxes {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 26px;
+  }
+  .pin-box {
+    width: 50px;
+    height: 58px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--ink);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+  }
+  .pin-box:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-soft);
+    transform: translateY(-1px);
+  }
+  .pin-box.filled {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .login-submit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 6px 16px rgba(239,122,31,0.3);
+  }
+  .login-footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--ink-soft);
+    opacity: 0.7;
+    margin: 18px 0 0;
+    letter-spacing: 0.02em;
+  }
+  .link-btn {
+    display: block;
+    margin: 14px auto 0;
+    background: none;
+    border: none;
+    color: var(--accent-dark);
+    font-family: 'Inter', sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .link-btn:hover { color: var(--accent); }
+
+  .app-footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--ink-soft);
+    opacity: 0.55;
+    letter-spacing: 0.02em;
+    margin: 8px 0 4px;
+    max-width: 520px;
+    width: 100%;
+  }
+
+  /* Header / branding */
+  .brand-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    max-width: 520px;
+    width: 100%;
+    margin: 0 auto 6px;
+  }
+  .brand-header img {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(239,122,31,0.25);
+  }
+  .brand-header .brand-name {
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 800;
+    font-size: 21px;
+    color: var(--accent-dark);
+    line-height: 1.15;
+  }
+  .brand-header .brand-sub {
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  /* Bead-row signature divider */
+  .bead-divider {
+    max-width: 520px;
+    width: 100%;
+    margin: 4px auto 20px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .bead-divider .wire {
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--line) 15%, var(--line) 85%, transparent);
+  }
+  .bead-divider .bead {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--line);
+    flex-shrink: 0;
+  }
+  .bead-divider .bead.lit {
+    background: var(--gold);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    max-width: 520px;
+    width: 100%;
+    margin: 0 auto 20px;
+    background: var(--accent-soft);
+    padding: 5px;
+    border-radius: 999px;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 10px 8px;
+    border-radius: 16px;
+    border: none;
+    background: transparent;
+    color: var(--accent-dark);
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+  }
+  .tab-icon { font-size: 17px; line-height: 1; }
+  .tab-btn:hover:not(.active) { background: rgba(255,255,255,0.6); }
+  .tab-btn:active { transform: scale(0.96); }
+  .tab-btn.active {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(239,122,31,0.35);
+  }
+  .tab-btn:focus-visible {
+    outline: 2px solid var(--accent-dark);
+    outline-offset: 2px;
+  }
+  .tab-btn.active:focus-visible {
+    outline: none;
+  }
+
+  /* Manage students list */
+  .manage-list {
+    max-height: 320px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .manage-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  .manage-row .names { font-size: 13.5px; }
+  .manage-row .names .student { font-weight: 600; }
+  .manage-row .names .parent { color: var(--ink-soft); font-size: 12px; }
+  .delete-btn {
+    background: var(--bad-bg);
+    color: var(--bad);
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .delete-btn:hover { background: #f5d4d4; }
+  .delete-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Bulk add student rows */
+  .add-row-group {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+  .add-row-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .row-number {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .row-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    flex: 1;
+  }
+  .add-row-group .remove-row-btn {
+    background: none;
+    border: none;
+    color: var(--bad);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 2px 6px;
+  }
+  .add-row-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .add-row-grid input {
+    padding: 9px 10px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    font-size: 13.5px;
+    font-family: inherit;
+    color: var(--ink);
+    background: #fff;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  @media (max-width: 700px) {
+    .add-row-grid input { font-size: 16px; }
+  }
+  .add-row-grid input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  @media (max-width: 420px) {
+    .add-row-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Demo bookings list */
+  .booking-row {
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .booking-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .booking-top .student-name { font-weight: 700; font-size: 14.5px; }
+  .booking-detail { font-size: 12.5px; color: var(--ink-soft); }
+  .status-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+  .status-badge.confirmed { background: var(--good-bg); color: var(--good); }
+  .status-badge.pending { background: var(--accent-soft); color: var(--accent-dark); }
+  .status-badge.cancelled { background: var(--bad-bg); color: var(--bad); }
+
+  /* Avatar circles with initials */
+  .avatar-circle {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+    font-family: 'Baloo 2', sans-serif;
+  }
+
+  /* Card entrance + row hover polish */
+  .card {
+    animation: cardFadeIn 0.3s ease;
+  }
+  @keyframes cardFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .manage-row, .booking-row, .feedback-row {
+    transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  }
+  .manage-row:hover, .booking-row:hover, .feedback-row:hover {
+    border-color: var(--accent);
+    box-shadow: 0 2px 10px rgba(239,122,31,0.1);
+  }
+
+  /* Feedback list */
+  .feedback-row {
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .feedback-row .student-name { font-weight: 700; font-size: 14.5px; }
+  .feedback-row .feedback-text { font-size: 13.5px; color: var(--ink); line-height: 1.5; }
+  .feedback-row .feedback-time { font-size: 11.5px; color: var(--ink-soft); }
+  .feedback-answers {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 2px 0 2px 36px; /* aligns under the name, past the avatar */
+  }
+  .feedback-qa {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .feedback-qa .feedback-q {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  .feedback-qa .feedback-a {
+    font-size: 13.5px;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  /* ============================================================
+     BOTTOM TAB BAR (mobile only) — fixed to the bottom of the
+     screen like a native app's tab bar, instead of a pill row
+     that scrolls away with the page. Desktop/tablet keeps the
+     top pill tabs (see min-width:700px override below).
+     ============================================================ */
+  @media (max-width: 699px) {
+    #mainApp { padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px)); }
+    .tabs {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 20;
+      max-width: none;
+      margin: 0;
+      border-radius: 0;
+      background: var(--panel);
+      border-top: 1px solid var(--line);
+      padding: 8px 6px calc(8px + env(safe-area-inset-bottom, 0px));
+      box-shadow: 0 -4px 16px rgba(43,33,24,0.08);
+    }
+    .tab-btn { color: var(--ink-soft); border-radius: 12px; }
+    .tab-btn.active { box-shadow: none; }
+  }
+
+  /* ============================================================
+     RESPONSIVE — widen the layout on tablets/laptops instead of
+     staying phone-width. Mobile styles above remain the default;
+     these media queries only apply as the viewport grows.
+     ============================================================ */
+  @media (min-width: 700px) {
+    .card, .brand-header, .bead-divider, .tabs, .app-footer {
+      max-width: 640px;
+    }
+    .card#bookingsCard, .card#feedbackCard {
+      max-width: 720px;
+    }
+    body { padding: 48px 24px; }
+  }
+
+  @media (min-width: 1000px) {
+    .card, .brand-header, .bead-divider, .tabs, .app-footer {
+      max-width: 760px;
+    }
+    .card#bookingsCard, .card#feedbackCard {
+      max-width: 820px;
+    }
+    /* Give the bulk-add grid room to breathe into 4 columns on wide screens */
+    .add-row-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .row { gap: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-topbar"></div>
+    <div class="login-inner">
+      <div class="login-logo-wrap">
+        <img class="login-logo" src="logo.png" id="loginLogoImg" alt="SIP Abacus logo">
+      </div>
+      <h1 class="login-title">SIP Abacus</h1>
+      <p class="login-sub">Yelahanka New Town · Centre Dashboard</p>
+
+      <div class="login-bead-divider">
+        <span class="bead-dot"></span>
+        <span class="bead-dot"></span>
+        <span class="bead-dot lit"></span>
+        <span class="bead-dot"></span>
+        <span class="bead-dot"></span>
+      </div>
+
+      <p class="login-instruction">Enter your PIN to continue</p>
+
+      <div class="pin-boxes" id="pinBoxes">
+        <input type="password" class="pin-box" inputmode="numeric" maxlength="1" data-pin-index="0" autocomplete="off">
+        <input type="password" class="pin-box" inputmode="numeric" maxlength="1" data-pin-index="1" autocomplete="off">
+        <input type="password" class="pin-box" inputmode="numeric" maxlength="1" data-pin-index="2" autocomplete="off">
+        <input type="password" class="pin-box" inputmode="numeric" maxlength="1" data-pin-index="3" autocomplete="off">
+      </div>
+
+      <button class="btn btn-primary login-submit-btn" id="loginBtn" type="button">
+        <span>Log in</span>
+      </button>
+      <div class="status" id="loginStatusBox"></div>
+
+      <p class="login-footer">SIP Abacus Centre Dashboard</p>
+    </div>
+  </div>
+</div>
+
+<div id="mainApp" style="display:none; width:100%; flex-direction:column; align-items:center;">
+
+<div class="brand-header">
+  <img src="logo.png" id="mainLogoImg" alt="SIP Abacus logo">
+  <div>
+    <div class="brand-name">SIP Abacus</div>
+    <div class="brand-sub" id="brandSubLine">Yelahanka New Town · Centre Dashboard</div>
+  </div>
+  <button class="link-btn" id="logoutBtn" type="button" style="margin-left:auto;">Log out</button>
+</div>
+
+<div class="bead-divider">
+  <div class="wire"></div>
+  <div class="bead"></div>
+  <div class="bead"></div>
+  <div class="bead lit"></div>
+  <div class="bead"></div>
+  <div class="bead"></div>
+  <div class="wire"></div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" id="tabStudentsBtn" type="button"><span class="tab-icon">👥</span>Manage Students</button>
+  <button class="tab-btn" id="tabBroadcastBtn" type="button"><span class="tab-icon">📢</span>Send Broadcast</button>
+  <button class="tab-btn" id="tabBookingsBtn" type="button"><span class="tab-icon">📅</span>Demo Bookings</button>
+  <button class="tab-btn" id="tabFeedbackBtn" type="button"><span class="tab-icon">💬</span>Feedback</button>
+  <button class="tab-btn" id="tabSettingsBtn" type="button" style="display:none;"><span class="tab-icon">⚙️</span>Settings</button>
+</div>
+
+<div class="card" id="broadcastCard" style="display:none;">
+  <h1>📢 Send a broadcast</h1>
+  <p class="subtitle">Choose the event, set the date and time, pick your students, and send.</p>
+
+  <div class="field">
+    <label for="eventType">Event</label>
+    <select id="eventType">
+      <option value="parent_orientation">Parent Orientation Program</option>
+      <option value="level_end_meeting">Level End Meeting</option>
+      <option value="home_practice">Home Practice Reminder</option>
+      <option value="absence">Attendance Absence Follow-up</option>
+      <option value="holiday_closure">Holiday Closure (sends to everyone)</option>
+    </select>
+  </div>
+
+  <div class="field" id="eventNameField" style="display:none;">
+    <label for="eventNameInput">Holiday name</label>
+    <input type="text" id="eventNameInput" placeholder="e.g. Ganesha Festival">
+  </div>
+
+  <div class="row" id="dateTimeRow">
+    <div class="field">
+      <label for="eventDate">Date</label>
+      <input type="date" id="eventDate">
+    </div>
+    <div class="field" id="timeField">
+      <label for="eventTime">Time</label>
+      <input type="time" id="eventTime">
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div id="studentsSection">
+    <div class="students-summary">
+      <p id="studentsLabel"><strong>No students selected yet.</strong></p>
+      <button class="btn btn-secondary" id="selectStudentsBtn" type="button">+ Select Students</button>
+    </div>
+  </div>
+
+  <p id="everyoneNotice" style="display:none; font-size:13.5px; color:var(--ink-soft); margin:0;">This will be sent to <strong>every contact</strong> in BroadcastList — no student selection needed.</p>
+
+  <button class="btn btn-primary" id="sendBtn" type="button" disabled>Send</button>
+
+  <div class="status" id="statusBox"></div>
+</div>
+
+<div class="card" id="studentsCard">
+  <h1>👥 Manage students</h1>
+  <p class="subtitle">Add one or more students, or remove one from BroadcastList.</p>
+
+  <div id="addStudentRows">
+    <div class="add-row-group" data-row>
+      <div class="add-row-header">
+        <span class="row-number">1</span>
+        <span class="row-title">Student</span>
+      </div>
+      <div class="add-row-grid">
+        <input type="text" class="new-student-name" placeholder="Student name">
+        <input type="text" class="new-parent-name" placeholder="Parent name">
+        <input type="text" class="new-phone" placeholder="Phone">
+        <input type="text" class="new-amount" placeholder="Fee amount">
+      </div>
+    </div>
+  </div>
+
+  <button class="btn btn-secondary" id="addAnotherRowBtn" type="button" style="width:100%; margin-bottom:12px;">+ Add another student</button>
+  <button class="btn btn-primary" id="addStudentBtn" type="button">Add all</button>
+  <div class="status" id="addStatusBox"></div>
+
+  <hr class="divider">
+
+  <div class="students-summary list-controls-row" style="margin-bottom:10px;">
+    <p style="margin:0; font-size:13.5px; color:var(--ink-soft);"><strong id="studentListCount">0</strong> student(s) <span id="studentListModeLabel">added this session</span></p>
+    <div class="list-controls-buttons">
+      <button class="btn btn-secondary" id="showAllStudentsBtn" type="button">Show All</button>
+      <button class="btn btn-secondary" id="refreshStudentListBtn" type="button">Refresh</button>
+    </div>
+  </div>
+  <div id="manageStudentList" class="manage-list">
+    <div class="empty-state">No students added yet this session. Add one above, or click "Show All" to see everyone in BroadcastList.</div>
+  </div>
+  <div class="status" id="deleteStatusBox"></div>
+</div>
+
+<div class="card" id="bookingsCard" style="display:none; max-width:640px;">
+  <h1>📅 Demo bookings</h1>
+  <p class="subtitle">Shows every demo booked for the selected date.</p>
+
+
+  <div class="row feedback-controls-row" style="align-items:flex-end;">
+    <div class="field" style="flex:1;">
+      <label for="bookingsDateFilter">Date</label>
+      <input type="date" id="bookingsDateFilter">
+    </div>
+    <button class="btn btn-secondary" id="bookingsShowAllBtn" type="button" style="margin-bottom:18px;">Show All</button>
+    <button class="btn btn-secondary" id="refreshBookingsBtn" type="button" style="margin-bottom:18px;">Refresh</button>
+  </div>
+
+  <p style="margin:0 0 12px; font-size:13.5px; color:var(--ink-soft);"><strong id="bookingsCount">0</strong> demo(s)<span id="bookingsCountLabel"> on this date</span> <span id="bookingsLastSynced" style="opacity:0.7;"></span></p>
+
+  <div id="bookingsList" class="manage-list" style="max-height:460px;">
+    <div class="empty-state">Loading bookings…</div>
+  </div>
+</div>
+
+<div class="card" id="feedbackCard" style="display:none; max-width:640px;">
+  <h1>💬 Parent feedback</h1>
+  <p class="subtitle">Responses submitted through the feedback form, newest first.</p>
+
+  <div class="row feedback-controls-row" style="align-items:flex-end;">
+    <div class="field" style="flex:1;">
+      <label for="feedbackSearch">Search</label>
+      <input type="text" id="feedbackSearch" placeholder="Search by student name or feedback text...">
+    </div>
+    <button class="btn btn-secondary" id="feedbackShowAllBtn" type="button" style="margin-bottom:18px;">Show All</button>
+    <button class="btn btn-secondary" id="refreshFeedbackBtn" type="button" style="margin-bottom:18px;">Refresh</button>
+  </div>
+
+  <p style="margin:0 0 12px; font-size:13.5px; color:var(--ink-soft);"><strong id="feedbackCount">0</strong> response(s)<span id="feedbackCountLabel"> from the last 7 days</span> <span id="feedbackLastSynced" style="opacity:0.7;"></span></p>
+
+  <div id="feedbackList" class="manage-list" style="max-height:500px;">
+    <div class="empty-state">Loading feedback…</div>
+  </div>
+</div>
+
+<div class="card" id="settingsCard" style="display:none;">
+  <h1>⚙️ Settings</h1>
+  <p class="subtitle">Developer only. These webhook URLs connect the dashboard to your n8n workflows. Update them here after activating or re-importing a workflow — no code editing needed.</p>
+
+  <div class="field">
+    <label for="settingOrientationLevelEnd">Orientation + Level End Meeting webhook</label>
+    <div class="url-field-wrap">
+      <span class="url-field-icon">🔗</span>
+      <input type="text" class="url-field" id="settingOrientationLevelEnd" placeholder="https://your-n8n.com/webhook/sip-abacus-orientation-levelend">
+    </div>
+  </div>
+  <div class="field">
+    <label for="settingPracticeAbsence">Home Practice + Absence webhook</label>
+    <div class="url-field-wrap">
+      <span class="url-field-icon">🔗</span>
+      <input type="text" class="url-field" id="settingPracticeAbsence" placeholder="https://your-n8n.com/webhook/sip-abacus-practice-absence">
+    </div>
+  </div>
+  <div class="field">
+    <label for="settingHolidayClosure">Holiday Closure webhook</label>
+    <div class="url-field-wrap">
+      <span class="url-field-icon">🔗</span>
+      <input type="text" class="url-field" id="settingHolidayClosure" placeholder="https://your-n8n.com/webhook/sip-abacus-holiday-closure">
+    </div>
+  </div>
+  <div class="field">
+    <label for="settingManageStudents">Manage Students webhook</label>
+    <div class="url-field-wrap">
+      <span class="url-field-icon">🔗</span>
+      <input type="text" class="url-field" id="settingManageStudents" placeholder="https://your-n8n.com/webhook/sip-abacus-manage-students">
+    </div>
+  </div>
+  <div class="field">
+    <label for="settingAdminResetPin">Admin Reset PIN webhook</label>
+    <div class="url-field-wrap">
+      <span class="url-field-icon">🔗</span>
+      <input type="text" class="url-field" id="settingAdminResetPin" placeholder="https://your-n8n.com/webhook/sip-abacus-admin-reset-pin">
+    </div>
+  </div>
+
+  <button class="btn btn-primary" id="saveSettingsBtn" type="button">Save all</button>
+  <div class="status" id="settingsStatusBox"></div>
+
+  <hr class="divider">
+
+  <h1 style="font-size:17px;">🔑 Reset a user's PIN</h1>
+  <p class="subtitle">Overwrites their PIN directly — they don't need to know the old one.</p>
+  <div class="field">
+    <label for="resetPinName">Name</label>
+    <input type="text" id="resetPinName" placeholder="e.g. TEACHER1">
+  </div>
+  <div class="field">
+    <label for="resetPinNew">New PIN</label>
+    <input type="text" id="resetPinNew" placeholder="e.g. 4321" inputmode="numeric" maxlength="4">
+  </div>
+  <button class="btn btn-primary" id="adminResetPinBtn" type="button">Reset PIN</button>
+  <div class="status" id="adminResetPinStatusBox"></div>
+</div>
+
+<p class="app-footer">SIP Abacus · Yelahanka New Town</p>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Select students</h2>
+      <p>Pulled live from your BroadcastList sheet.</p>
+    </div>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Search by student or parent name...">
+    </div>
+    <div class="modal-list" id="modalList">
+      <div class="empty-state">Loading students…</div>
+    </div>
+    <div class="modal-foot">
+      <span class="count" id="selectedCount">0 selected</span>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-secondary" id="closeModalBtn" type="button">Cancel</button>
+        <button class="btn btn-primary" id="confirmSelectBtn" type="button" style="margin:0; width:auto;">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Logo, embedded once here and reused for both the login screen and header.
+
+  // ============================================================
+  // CONFIGURATION — fill these in before using the dashboard
+  // ============================================================
+
+  // Your Google Sheet ID (from its URL) and the BroadcastList tab name.
+  // The sheet must be shared as "Anyone with the link can view" for
+  // this fetch to work, since it's a client-side (browser) request.
+  const SHEET_ID = '1Qo5JTGj-3QtZwnd7Hrw-GBDWtmmIr3-xDOz9EFeGfqg';
+  const SHEET_TAB_NAME = 'BroadcastList';
+  const DEMO_BOOKINGS_TAB_NAME = 'Demo_Bookings';
+  const FEEDBACK_TAB_NAME = 'FeedbackResponses';
+
+  // Replace with your real n8n Production webhook URLs once each
+  // workflow is activated. Three workflows now handle the 5 event types.
+  // These are FALLBACK defaults only — the Settings tab (developer-only)
+  // lets you update these live from a 'Settings' sheet tab instead of
+  // editing this code every time. loadSettingsFromSheet() below
+  // overwrites these at startup if the Settings sheet has saved values.
+  let WEBHOOK_URLS = {
+    parent_orientation: 'https://n8n.endat.co.in/webhook/sip-abacus-orientation-levelend',
+    level_end_meeting: 'https://n8n.endat.co.in/webhook/sip-abacus-orientation-levelend',
+    home_practice: 'https://n8n.endat.co.in/webhook/sip-abacus-practice-absence',
+    absence: 'https://n8n.endat.co.in/webhook/sip-abacus-practice-absence',
+    holiday_closure: 'https://n8n.endat.co.in/webhook/sip-abacus-holiday-closure'
+  };
+
+  // Webhook for the 4th workflow — adding/deleting students in BroadcastList.
+  let MANAGE_STUDENTS_WEBHOOK_URL = 'https://n8n.endat.co.in/webhook/sip-abacus-manage-students';
+
+  // Users sheet (columns: PIN | Name | Role) drives login + role-based access.
+  const USERS_TAB_NAME = 'Users';
+
+  // Settings sheet (columns: Key | Value) stores the webhook URLs above so
+  // they can be edited from the dashboard's Settings tab instead of code.
+  // This ONE webhook URL still has to be hardcoded — it's what SAVES the
+  // others — so fill it in once after importing SIP_Abacus_6_Update_Settings.json.
+  const SETTINGS_TAB_NAME = 'Settings';
+  const SETTINGS_WEBHOOK_URL = 'https://n8n.endat.co.in/webhook/sip-abacus-update-settings';
+
+  // Admin PIN reset (developer only, from the Settings tab).
+  let ADMIN_RESET_PIN_WEBHOOK_URL = 'https://n8n.endat.co.in/webhook/sip-abacus-admin-reset-pin';
+
+  // ============================================================
+
+  let allStudents = [];       // [{phone, parentName, studentName}]
+  let selectedPhones = new Set();
+
+  const EVENTS_NEEDING_DATETIME = new Set(['parent_orientation', 'level_end_meeting']);
+  const EVENTS_NEEDING_DATE_ONLY = new Set(['holiday_closure']);
+  const EVENTS_NEEDING_EVENT_NAME = new Set(['holiday_closure']);
+  const EVENTS_SENDING_TO_EVERYONE = new Set(['holiday_closure']);
+
+  const modalList = document.getElementById('modalList');
+  const overlay = document.getElementById('overlay');
+  const searchInput = document.getElementById('searchInput');
+  const selectedCountEl = document.getElementById('selectedCount');
+  const studentsLabel = document.getElementById('studentsLabel');
+  const sendBtn = document.getElementById('sendBtn');
+  const statusBox = document.getElementById('statusBox');
+
+  function csvUrl() {
+    return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_TAB_NAME)}`;
+  }
+
+  function parseCsv(text) {
+    const rows = parseCsvRows(text);
+    const header = rows[0].map(h => h.trim().toLowerCase());
+    const phoneIdx = header.indexOf('phone');
+    const parentIdx = header.indexOf('parentname');
+    const studentIdx = header.indexOf('studentname');
+
+    return rows.slice(1)
+      .filter(cols => cols[phoneIdx] && cols[phoneIdx].trim())
+      .map(cols => ({
+        phone: (cols[phoneIdx] || '').trim(),
+        parentName: (cols[parentIdx] || '').trim(),
+        studentName: (cols[studentIdx] || '').trim() || 'Student'
+      }));
+  }
+
+  // ============================================================
+  // ROBUST CSV PARSER — processes the whole text character by
+  // character so quoted fields containing commas, newlines, or
+  // escaped quotes ("") don't get corrupted. Naively splitting
+  // by '\n' first (the old approach) breaks any multi-line answer
+  // (e.g. a paragraph feedback response) into fake extra rows.
+  // ============================================================
+  function parseCsvRows(text) {
+    const rows = [];
+    let row = [];
+    let field = '';
+    let inQuotes = false;
+    let i = 0;
+
+    while (i < text.length) {
+      const c = text[i];
+
+      if (inQuotes) {
+        if (c === '"') {
+          if (text[i + 1] === '"') { field += '"'; i += 2; continue; } // escaped quote
+          inQuotes = false; i++; continue;
+        }
+        field += c; i++; continue;
+      }
+
+      if (c === '"') { inQuotes = true; i++; continue; }
+      if (c === ',') { row.push(field); field = ''; i++; continue; }
+      if (c === '\r') { i++; continue; } // ignore, handle \n below
+      if (c === '\n') {
+        row.push(field); field = '';
+        rows.push(row); row = [];
+        i++; continue;
+      }
+      field += c; i++;
+    }
+    // Final field/row (file may not end with a newline)
+    if (field.length > 0 || row.length > 0) {
+      row.push(field);
+      rows.push(row);
+    }
+
+    return rows.filter(r => r.some(f => f.trim() !== ''));
+  }
+
+  async function loadStudents() {
+    try {
+      const res = await fetch(csvUrl());
+      if (!res.ok) throw new Error('Sheet fetch failed — check sharing settings.');
+      const text = await res.text();
+      allStudents = parseCsv(text);
+      renderList(allStudents);
+    } catch (err) {
+      modalList.innerHTML = `<div class="empty-state">Couldn't load students.<br>${err.message}</div>`;
+    }
+  }
+
+  function renderList(students) {
+    if (students.length === 0) {
+      modalList.innerHTML = `<div class="empty-state"><span style="font-size:26px;">🔍</span>No students found matching your search.</div>`;
+      return;
+    }
+    modalList.innerHTML = students.map(s => `
+      <label class="student-row">
+        <input type="checkbox" data-phone="${s.phone}" ${selectedPhones.has(s.phone) ? 'checked' : ''}>
+        <span class="names">
+          <span class="student">${escapeHtml(s.studentName)}</span><br>
+          <span class="parent">${escapeHtml(s.parentName)} · ${escapeHtml(s.phone)}</span>
+        </span>
+      </label>
+    `).join('');
+
+    modalList.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const phone = cb.getAttribute('data-phone');
+        if (cb.checked) selectedPhones.add(phone);
+        else selectedPhones.delete(phone);
+        updateSelectedCount();
+      });
+    });
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function initials(name) {
+    const clean = (name || '').trim();
+    if (!clean) return '?';
+    const parts = clean.split(/\s+/);
+    return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
+  }
+
+  function stampLastSynced(elId) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    const time = new Date().toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' });
+    el.textContent = `· Updated ${time}`;
+  }
+
+  function updateSelectedCount() {
+    selectedCountEl.textContent = `${selectedPhones.size} selected`;
+  }
+
+  function updateStudentsLabel() {
+    const n = selectedPhones.size;
+    studentsLabel.innerHTML = n === 0
+      ? '<strong>No students selected yet.</strong>'
+      : `<strong>${n} student${n === 1 ? '' : 's'} selected</strong>`;
+    checkFormReady();
+  }
+
+  function needsDateTime() {
+    return EVENTS_NEEDING_DATETIME.has(document.getElementById('eventType').value);
+  }
+
+  function needsDateOnly() {
+    return EVENTS_NEEDING_DATE_ONLY.has(document.getElementById('eventType').value);
+  }
+
+  function needsEventName() {
+    return EVENTS_NEEDING_EVENT_NAME.has(document.getElementById('eventType').value);
+  }
+
+  function sendsToEveryone() {
+    return EVENTS_SENDING_TO_EVERYONE.has(document.getElementById('eventType').value);
+  }
+
+  function updateFieldVisibility() {
+    const showDate = needsDateTime() || needsDateOnly();
+    const showTime = needsDateTime();
+    document.getElementById('dateTimeRow').style.display = showDate ? 'flex' : 'none';
+    document.getElementById('timeField').style.display = showTime ? 'block' : 'none';
+    document.getElementById('eventNameField').style.display = needsEventName() ? 'block' : 'none';
+    document.getElementById('studentsSection').style.display = sendsToEveryone() ? 'none' : 'block';
+    document.getElementById('everyoneNotice').style.display = sendsToEveryone() ? 'block' : 'none';
+    checkFormReady();
+  }
+
+  function checkFormReady() {
+    const dateOk = (needsDateTime() || needsDateOnly())
+      ? !!document.getElementById('eventDate').value
+      : true;
+    const timeOk = needsDateTime()
+      ? !!document.getElementById('eventTime').value
+      : true;
+    const nameOk = needsEventName()
+      ? !!document.getElementById('eventNameInput').value.trim()
+      : true;
+    const studentsOk = sendsToEveryone()
+      ? true
+      : selectedPhones.size > 0;
+
+    sendBtn.disabled = !(dateOk && timeOk && nameOk && studentsOk);
+  }
+
+  document.getElementById('eventType').addEventListener('change', () => {
+    selectedPhones.clear();
+    updateStudentsLabel();
+    updateFieldVisibility();
+  });
+  document.getElementById('eventNameInput').addEventListener('input', checkFormReady);
+  updateFieldVisibility();
+
+  document.getElementById('selectStudentsBtn').addEventListener('click', () => {
+    overlay.classList.add('show');
+    if (allStudents.length === 0) loadStudents();
+    else renderList(allStudents);
+  });
+
+  document.getElementById('closeModalBtn').addEventListener('click', () => {
+    overlay.classList.remove('show');
+  });
+
+  // Click the dark backdrop (not the modal itself) or press Escape to close.
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.classList.remove('show');
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && overlay.classList.contains('show')) {
+      overlay.classList.remove('show');
+    }
+  });
+
+  document.getElementById('confirmSelectBtn').addEventListener('click', () => {
+    overlay.classList.remove('show');
+    updateStudentsLabel();
+  });
+
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim().toLowerCase();
+    const filtered = allStudents.filter(s =>
+      s.studentName.toLowerCase().includes(q) || s.parentName.toLowerCase().includes(q)
+    );
+    renderList(filtered);
+  });
+
+  document.getElementById('eventDate').addEventListener('change', checkFormReady);
+  document.getElementById('eventTime').addEventListener('change', checkFormReady);
+
+  function formatDateForMessage(isoDate) {
+    const d = new Date(isoDate + 'T00:00:00');
+    return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+
+  function formatTimeForMessage(time24) {
+    const [h, m] = time24.split(':').map(Number);
+    const period = h >= 12 ? 'PM' : 'AM';
+    const h12 = h % 12 === 0 ? 12 : h % 12;
+    return `${h12}:${String(m).padStart(2, '0')} ${period}`;
+  }
+
+  function showStatus(kind, message) {
+    statusBox.className = `status show ${kind}`;
+    statusBox.textContent = message;
+  }
+
+  sendBtn.addEventListener('click', async () => {
+    const eventType = document.getElementById('eventType').value;
+    const payload = { eventType };
+
+    if (!sendsToEveryone()) {
+      payload.phones = Array.from(selectedPhones);
+    }
+
+    if (needsDateTime()) {
+      const date = document.getElementById('eventDate').value;
+      const time = document.getElementById('eventTime').value;
+      payload.meetingDate = formatDateForMessage(date);
+      payload.meetingTime = formatTimeForMessage(time);
+    } else if (needsDateOnly()) {
+      const date = document.getElementById('eventDate').value;
+      payload.meetingDate = formatDateForMessage(date);
+    }
+
+    if (needsEventName()) {
+      payload.eventName = document.getElementById('eventNameInput').value.trim();
+    }
+
+    sendBtn.disabled = true;
+    sendBtn.classList.add('loading');
+    showStatus('pending', 'Sending messages…');
+
+    try {
+      const res = await fetch(WEBHOOK_URLS[eventType], {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error(`Server responded with ${res.status}`);
+      const data = await res.json().catch(() => ({}));
+      const count = data.count ?? (payload.phones ? payload.phones.length : '');
+      showStatus('ok', count !== '' ? `Sent to ${count} recipient${count === 1 ? '' : 's'}.` : 'Sent.');
+
+      // Reset for a fresh next entry — don't carry selections into the next send.
+      selectedPhones.clear();
+      updateStudentsLabel();
+      const eventNameInput = document.getElementById('eventNameInput');
+      if (eventNameInput) eventNameInput.value = '';
+    } catch (err) {
+      showStatus('err', `Couldn't send: ${err.message}`);
+    } finally {
+      sendBtn.disabled = false;
+      sendBtn.classList.remove('loading');
+    }
+  });
+  // ============================================================
+  // TAB SWITCHING
+  // ============================================================
+  const tabBroadcastBtn = document.getElementById('tabBroadcastBtn');
+  const tabStudentsBtn = document.getElementById('tabStudentsBtn');
+  const tabBookingsBtn = document.getElementById('tabBookingsBtn');
+  const tabFeedbackBtn = document.getElementById('tabFeedbackBtn');
+  const tabSettingsBtn = document.getElementById('tabSettingsBtn');
+  const broadcastCard = document.getElementById('broadcastCard');
+  const studentsCard = document.getElementById('studentsCard');
+  const bookingsCard = document.getElementById('bookingsCard');
+  const feedbackCard = document.getElementById('feedbackCard');
+  const settingsCard = document.getElementById('settingsCard');
+
+  function activateTab(activeBtn, activeCard) {
+    [tabBroadcastBtn, tabStudentsBtn, tabBookingsBtn, tabFeedbackBtn, tabSettingsBtn].forEach(b => b.classList.remove('active'));
+    [broadcastCard, studentsCard, bookingsCard, feedbackCard, settingsCard].forEach(c => c.style.display = 'none');
+    activeBtn.classList.add('active');
+    activeCard.style.display = 'block';
+  }
+
+  tabBroadcastBtn.addEventListener('click', () => activateTab(tabBroadcastBtn, broadcastCard));
+
+  tabStudentsBtn.addEventListener('click', () => {
+    activateTab(tabStudentsBtn, studentsCard);
+    renderRecentlyAdded();
+  });
+
+  tabBookingsBtn.addEventListener('click', () => {
+    activateTab(tabBookingsBtn, bookingsCard);
+    loadBookings();
+  });
+
+  tabFeedbackBtn.addEventListener('click', () => {
+    activateTab(tabFeedbackBtn, feedbackCard);
+    loadFeedback();
+  });
+
+  tabSettingsBtn.addEventListener('click', () => {
+    activateTab(tabSettingsBtn, settingsCard);
+    populateSettingsForm();
+  });
+
+  // ============================================================
+  // MANAGE STUDENTS — bulk add, delete, session-default view
+  // ============================================================
+  const manageStudentList = document.getElementById('manageStudentList');
+  const studentListCount = document.getElementById('studentListCount');
+  const studentListModeLabel = document.getElementById('studentListModeLabel');
+  const addStatusBox = document.getElementById('addStatusBox');
+  const deleteStatusBox = document.getElementById('deleteStatusBox');
+  const addStudentRows = document.getElementById('addStudentRows');
+
+  // Students added this session (shown by default instead of the whole sheet).
+  let recentlyAddedStudents = [];
+  let showingAllStudents = false;
+
+  function showAddStatus(kind, message) {
+    addStatusBox.className = `status show ${kind}`;
+    addStatusBox.textContent = message;
+  }
+
+  function showDeleteStatus(kind, message) {
+    deleteStatusBox.className = `status show ${kind}`;
+    deleteStatusBox.textContent = message;
+  }
+
+  // ---- Bulk add rows ----
+  document.getElementById('addAnotherRowBtn').addEventListener('click', () => {
+    const group = document.createElement('div');
+    group.className = 'add-row-group';
+    group.setAttribute('data-row', '');
+    const rowNum = addStudentRows.querySelectorAll('[data-row]').length + 1;
+    group.innerHTML = `
+      <div class="add-row-header">
+        <span class="row-number">${rowNum}</span>
+        <span class="row-title">Student</span>
+        <button class="remove-row-btn" type="button">Remove</button>
+      </div>
+      <div class="add-row-grid">
+        <input type="text" class="new-student-name" placeholder="Student name">
+        <input type="text" class="new-parent-name" placeholder="Parent name">
+        <input type="text" class="new-phone" placeholder="Phone">
+        <input type="text" class="new-amount" placeholder="Fee amount">
+      </div>
+    `;
+    group.querySelector('.remove-row-btn').addEventListener('click', () => {
+      group.remove();
+      renumberAddRows();
+    });
+    addStudentRows.appendChild(group);
+  });
+
+  function clearAddRows() {
+    // Remove all but the first row group, then clear the first row's fields.
+    const groups = addStudentRows.querySelectorAll('[data-row]');
+    groups.forEach((g, i) => { if (i > 0) g.remove(); });
+    addStudentRows.querySelectorAll('input').forEach(input => input.value = '');
+  }
+
+  function renumberAddRows() {
+    addStudentRows.querySelectorAll('[data-row]').forEach((g, i) => {
+      const badge = g.querySelector('.row-number');
+      if (badge) badge.textContent = i + 1;
+    });
+  }
+
+  document.getElementById('addStudentBtn').addEventListener('click', async () => {
+    const groups = addStudentRows.querySelectorAll('[data-row]');
+    const entries = Array.from(groups).map(g => ({
+      studentName: g.querySelector('.new-student-name').value.trim(),
+      parentName: g.querySelector('.new-parent-name').value.trim(),
+      phone: g.querySelector('.new-phone').value.trim(),
+      amount: g.querySelector('.new-amount').value.trim()
+    })).filter(e => e.studentName || e.parentName || e.phone); // skip fully-empty rows
+
+    if (entries.length === 0) {
+      showAddStatus('err', 'Fill in at least one student.');
+      return;
+    }
+    const invalid = entries.find(e => !e.studentName || !e.parentName || !e.phone);
+    if (invalid) {
+      showAddStatus('err', 'Student name, parent name, and phone are required for every row.');
+      return;
+    }
+
+    const btn = document.getElementById('addStudentBtn');
+    btn.disabled = true;
+    btn.classList.add('loading');
+    showAddStatus('pending', `Adding ${entries.length} student${entries.length === 1 ? '' : 's'}…`);
+
+    let succeeded = 0;
+    const failedNames = [];
+
+    for (const entry of entries) {
+      try {
+        const res = await fetch(MANAGE_STUDENTS_WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'add', ...entry })
+        });
+        if (!res.ok) throw new Error();
+        succeeded++;
+        recentlyAddedStudents.unshift({ phone: entry.phone, parentName: entry.parentName, studentName: entry.studentName });
+      } catch {
+        failedNames.push(entry.studentName || entry.phone);
+      }
+    }
+
+    if (failedNames.length === 0) {
+      showAddStatus('ok', `${succeeded} student${succeeded === 1 ? '' : 's'} added.`);
+    } else {
+      showAddStatus('err', `Added ${succeeded}, failed: ${failedNames.join(', ')}`);
+    }
+
+    clearAddRows();
+
+    if (showingAllStudents) {
+      loadManageStudentList();
+    } else {
+      renderRecentlyAdded();
+    }
+
+    btn.disabled = false;
+    btn.classList.remove('loading');
+  });
+
+  // ---- List views ----
+  function renderRecentlyAdded() {
+    showingAllStudents = false;
+    studentListModeLabel.textContent = 'added this session';
+    const showAllBtn = document.getElementById('showAllStudentsBtn');
+    showAllBtn.textContent = 'Show All';
+    showAllBtn.classList.remove('btn-toggle-active');
+    studentListCount.textContent = recentlyAddedStudents.length;
+
+    if (recentlyAddedStudents.length === 0) {
+      manageStudentList.innerHTML = `<div class="empty-state">No students added yet this session. Add one above, or click "Show All" to see everyone in BroadcastList.</div>`;
+      return;
+    }
+    renderManageList(recentlyAddedStudents);
+  }
+
+  async function loadManageStudentList() {
+    showingAllStudents = true;
+    studentListModeLabel.textContent = 'in BroadcastList';
+    const showAllBtn = document.getElementById('showAllStudentsBtn');
+    showAllBtn.textContent = 'Show Recent Only';
+    showAllBtn.classList.add('btn-toggle-active');
+    manageStudentList.innerHTML = `<div class="empty-state">Loading students…</div>`;
+    try {
+      const res = await fetch(csvUrl());
+      if (!res.ok) throw new Error('Sheet fetch failed — check sharing settings.');
+      const text = await res.text();
+      const students = parseCsv(text);
+      studentListCount.textContent = students.length;
+      renderManageList(students);
+    } catch (err) {
+      manageStudentList.innerHTML = `<div class="empty-state">Couldn't load students.<br>${err.message}</div>`;
+    }
+  }
+
+  function renderManageList(students) {
+    if (students.length === 0) {
+      manageStudentList.innerHTML = `<div class="empty-state"><span style="font-size:26px;">📭</span>No students yet.</div>`;
+      return;
+    }
+    manageStudentList.innerHTML = students.map(s => `
+      <div class="manage-row">
+        <span class="avatar-circle">${initials(s.studentName)}</span>
+        <span class="names" style="flex:1;">
+          <span class="student">${escapeHtml(s.studentName)}</span><br>
+          <span class="parent">${escapeHtml(s.parentName)} · ${escapeHtml(s.phone)}</span>
+        </span>
+        <button class="delete-btn" data-phone="${s.phone}" type="button">Delete</button>
+      </div>
+    `).join('');
+
+    manageStudentList.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', () => deleteStudent(btn.getAttribute('data-phone'), btn));
+    });
+  }
+
+  document.getElementById('showAllStudentsBtn').addEventListener('click', () => {
+    if (showingAllStudents) {
+      renderRecentlyAdded();
+    } else {
+      loadManageStudentList();
+    }
+  });
+
+  document.getElementById('refreshStudentListBtn').addEventListener('click', () => {
+    renderRecentlyAdded(); // Refresh always returns to the default view
+  });
+
+  async function deleteStudent(phone, btnEl) {
+    if (!confirm('Remove this student from BroadcastList?')) return;
+
+    btnEl.disabled = true;
+    btnEl.textContent = 'Removing…';
+    showDeleteStatus('pending', 'Removing student…');
+
+    try {
+      const res = await fetch(MANAGE_STUDENTS_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete', phone })
+      });
+      if (!res.ok) throw new Error(`Server responded with ${res.status}`);
+      const data = await res.json().catch(() => ({}));
+      if (data.status === 'not_found') {
+        showDeleteStatus('err', 'Student not found — list may be out of date.');
+      } else {
+        showDeleteStatus('ok', 'Student removed.');
+      }
+      recentlyAddedStudents = recentlyAddedStudents.filter(s => s.phone !== phone);
+      if (showingAllStudents) loadManageStudentList();
+      else renderRecentlyAdded();
+    } catch (err) {
+      showDeleteStatus('err', `Couldn't remove: ${err.message}`);
+      btnEl.disabled = false;
+      btnEl.textContent = 'Delete';
+    }
+  }
+  // ============================================================
+  // DEMO BOOKINGS — read-only view filtered by date
+  // ============================================================
+  const bookingsDateFilter = document.getElementById('bookingsDateFilter');
+  const bookingsList = document.getElementById('bookingsList');
+  const bookingsCount = document.getElementById('bookingsCount');
+
+  // Default to today
+  bookingsDateFilter.value = new Date().toISOString().slice(0, 10);
+
+  function bookingsCsvUrl() {
+    return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(DEMO_BOOKINGS_TAB_NAME)}`;
+  }
+
+  function parseBookingsCsv(text) {
+    const rows = parseCsvRows(text);
+    const header = rows[0].map(h => h.trim().toLowerCase());
+    const idx = {
+      timestamp: header.indexOf('timestamp'),
+      phone: header.indexOf('phone'),
+      parentName: header.indexOf('parentname'),
+      studentName: header.indexOf('studentname'),
+      age: header.indexOf('age'),
+      program: header.indexOf('program'),
+      status: header.indexOf('status'),
+      mode: header.indexOf('mode'),
+      demoDate: header.indexOf('demodate')
+    };
+
+    return rows.slice(1)
+      .filter(cols => cols[idx.phone] && cols[idx.phone].trim())
+      .map(cols => ({
+        timestamp: (cols[idx.timestamp] || '').trim(),
+        phone: (cols[idx.phone] || '').trim(),
+        parentName: (cols[idx.parentName] || '').trim(),
+        studentName: (cols[idx.studentName] || '').trim() || 'Student',
+        age: (cols[idx.age] || '').trim(),
+        program: (cols[idx.program] || '').trim(),
+        status: (cols[idx.status] || '').trim(),
+        mode: (cols[idx.mode] || '').trim(),
+        demoDate: (cols[idx.demoDate] || '').trim()
+      }));
+  }
+
+  function toIsoDateLoose(raw) {
+    if (!raw) return null;
+    const s = raw.trim();
+    const ymd = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (ymd) return `${ymd[1]}-${ymd[2].padStart(2,'0')}-${ymd[3].padStart(2,'0')}`;
+    const dmy = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
+    if (dmy) return `${dmy[3]}-${dmy[2].padStart(2,'0')}-${dmy[1].padStart(2,'0')}`;
+    const d = new Date(raw);
+    if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+    return null;
+  }
+
+  function statusClass(status) {
+    const s = (status || '').toLowerCase();
+    if (s.includes('cancel')) return 'cancelled';
+    if (s.includes('pending')) return 'pending'; // check before 'confirm' — "Pending Confirmation" contains "confirm" as a substring
+    if (s.includes('confirm')) return 'confirmed';
+    return 'pending';
+  }
+
+  let allBookings = [];
+
+  async function loadBookings() {
+    bookingsList.innerHTML = `<div class="empty-state">Loading bookings…</div>`;
+    try {
+      const res = await fetch(bookingsCsvUrl());
+      if (!res.ok) throw new Error('Sheet fetch failed — check sharing settings.');
+      const text = await res.text();
+      allBookings = parseBookingsCsv(text);
+      renderBookings();
+      stampLastSynced('bookingsLastSynced');
+    } catch (err) {
+      bookingsList.innerHTML = `<div class="empty-state">Couldn't load bookings.<br>${err.message}</div>`;
+    }
+  }
+
+  let bookingsShowAllActive = false;
+
+  function renderBookings() {
+    const showAll = bookingsShowAllActive;
+    const dateFieldWrapper = bookingsDateFilter.closest('.field');
+    const countLabel = document.getElementById('bookingsCountLabel');
+    const showAllBtn = document.getElementById('bookingsShowAllBtn');
+
+    let filtered;
+    if (showAll) {
+      showAllBtn.classList.add('btn-toggle-active');
+      showAllBtn.textContent = 'Show Selected Date';
+      dateFieldWrapper.style.opacity = '0.4';
+      bookingsDateFilter.disabled = true;
+      countLabel.textContent = ' upcoming (today onward)';
+
+      const todayIso = new Date().toISOString().slice(0, 10);
+      filtered = allBookings
+        .filter(b => {
+          const d = toIsoDateLoose(b.demoDate);
+          return d && d >= todayIso;
+        })
+        .sort((a, b) => toIsoDateLoose(a.demoDate).localeCompare(toIsoDateLoose(b.demoDate)));
+    } else {
+      showAllBtn.classList.remove('btn-toggle-active');
+      showAllBtn.textContent = 'Show All';
+      dateFieldWrapper.style.opacity = '1';
+      bookingsDateFilter.disabled = false;
+      countLabel.textContent = ' on this date';
+
+      const selectedDate = bookingsDateFilter.value;
+      filtered = allBookings.filter(b => toIsoDateLoose(b.demoDate) === selectedDate);
+    }
+
+    bookingsCount.textContent = filtered.length;
+
+    if (filtered.length === 0) {
+      bookingsList.innerHTML = `<div class="empty-state"><span style="font-size:26px;">📅</span>No demos found.</div>`;
+      return;
+    }
+
+    bookingsList.innerHTML = filtered.map(b => `
+      <div class="booking-row">
+        <div class="booking-top">
+          <span style="display:flex; align-items:center; gap:8px;">
+            <span class="avatar-circle" style="width:28px; height:28px; font-size:11px;">${initials(b.studentName)}</span>
+            <span class="student-name">${escapeHtml(b.studentName)}</span>
+          </span>
+          <span class="status-badge ${statusClass(b.status)}">${escapeHtml(b.status || 'Pending')}</span>
+        </div>
+        <span class="booking-detail">${escapeHtml(b.parentName)} · ${escapeHtml(b.phone)}</span>
+        <span class="booking-detail">${escapeHtml(b.mode || '—')} · ${escapeHtml(b.program || '—')} · Age ${escapeHtml(b.age || '—')}${showAll ? ' · ' + escapeHtml(b.demoDate) : ''}</span>
+      </div>
+    `).join('');
+  }
+
+  bookingsDateFilter.addEventListener('change', renderBookings);
+  document.getElementById('bookingsShowAllBtn').addEventListener('click', () => {
+    bookingsShowAllActive = !bookingsShowAllActive;
+    renderBookings();
+  });
+  document.getElementById('refreshBookingsBtn').addEventListener('click', () => {
+    bookingsShowAllActive = false; // Refresh always returns to the default view
+    loadBookings();
+  });
+
+  // ============================================================
+  // FEEDBACK — read-only view of Google Form responses
+  // ============================================================
+  const feedbackList = document.getElementById('feedbackList');
+  const feedbackCount = document.getElementById('feedbackCount');
+  const feedbackSearch = document.getElementById('feedbackSearch');
+
+  function feedbackCsvUrl() {
+    return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(FEEDBACK_TAB_NAME)}`;
+  }
+
+  function parseFeedbackCsv(text) {
+    const rows = parseCsvRows(text);
+    const rawHeader = rows[0].map(h => h.trim());
+    const header = rawHeader.map(h => h.toLowerCase());
+
+    // Google Forms typically names the timestamp column 'Timestamp',
+    // and your two question titles become their own columns.
+    const timestampIdx = header.indexOf('timestamp');
+    const studentIdx = header.findIndex(h => h.includes('student'));
+
+    // Every OTHER column is its own form question (concentration,
+    // memory, star rating, preferred mode, category, the final free-
+    // text comment, etc). Previously the code only ever pulled a
+    // single column (whichever header happened to contain the word
+    // "feedback"), so only that one field — or nothing, if the wrong
+    // column matched — ever showed. Now we keep every question/answer
+    // pair so the full response renders, not just one line of it.
+    const questionIdxs = rawHeader
+      .map((_, i) => i)
+      .filter(i => i !== timestampIdx && i !== studentIdx);
+
+    return rows.slice(1)
+      .filter(cols => cols.some(c => c && c.trim()))
+      .map(cols => {
+        const answers = questionIdxs
+          .map(i => ({ question: rawHeader[i], answer: (cols[i] || '').trim() }))
+          .filter(qa => qa.question && qa.answer); // skip blank answers
+        return {
+          timestamp: (cols[timestampIdx] || '').trim(),
+          studentName: (cols[studentIdx] || '').trim() || 'Unknown',
+          answers,
+          // Kept for search/back-compat: every answer joined into one string.
+          feedback: answers.map(a => a.answer).join(' · ')
+        };
+      })
+      .reverse(); // newest first
+  }
+
+  let allFeedback = [];
+  let feedbackShowAllActive = false;
+
+  // Google Forms timestamps are typically "DD/MM/YYYY HH:MM:SS". Falls back
+  // to native Date parsing for other formats.
+  function parseFeedbackTimestamp(raw) {
+    if (!raw) return null;
+    const dmy = raw.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})[, ]+(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+    if (dmy) {
+      const [, d, m, y, h, min, s] = dmy;
+      return new Date(+y, +m - 1, +d, +h, +min, +(s || 0));
+    }
+    const d = new Date(raw);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  async function loadFeedback() {
+    feedbackList.innerHTML = `<div class="empty-state">Loading feedback…</div>`;
+    try {
+      const res = await fetch(feedbackCsvUrl());
+      if (!res.ok) throw new Error('Sheet fetch failed — check sharing settings.');
+      const text = await res.text();
+      allFeedback = parseFeedbackCsv(text);
+      renderFeedback();
+      stampLastSynced('feedbackLastSynced');
+    } catch (err) {
+      feedbackList.innerHTML = `<div class="empty-state">Couldn't load feedback.<br>${err.message}</div>`;
+    }
+  }
+
+  function renderFeedback() {
+    const showAllBtn = document.getElementById('feedbackShowAllBtn');
+    const countLabel = document.getElementById('feedbackCountLabel');
+
+    let pool = allFeedback;
+    if (feedbackShowAllActive) {
+      showAllBtn.classList.add('btn-toggle-active');
+      showAllBtn.textContent = 'Show Recent Only';
+      countLabel.textContent = '';
+    } else {
+      showAllBtn.classList.remove('btn-toggle-active');
+      showAllBtn.textContent = 'Show All';
+      countLabel.textContent = ' from the last 7 days';
+      const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+      pool = allFeedback.filter(f => {
+        const t = parseFeedbackTimestamp(f.timestamp);
+        return t && t.getTime() >= cutoff;
+      });
+    }
+
+    const q = feedbackSearch.value.trim().toLowerCase();
+    const filtered = q
+      ? pool.filter(f =>
+          f.studentName.toLowerCase().includes(q) ||
+          f.answers.some(a => a.answer.toLowerCase().includes(q) || a.question.toLowerCase().includes(q))
+        )
+      : pool;
+
+    feedbackCount.textContent = filtered.length;
+
+    if (filtered.length === 0) {
+      const message = !feedbackShowAllActive && allFeedback.length > 0
+        ? `No feedback in the last 7 days. Click "Show All" to see older responses.`
+        : 'No feedback yet.';
+      feedbackList.innerHTML = `<div class="empty-state"><span style="font-size:26px;">💬</span>${message}</div>`;
+      return;
+    }
+
+    feedbackList.innerHTML = filtered.map(f => `
+      <div class="feedback-row">
+        <span style="display:flex; align-items:center; gap:8px;">
+          <span class="avatar-circle" style="width:28px; height:28px; font-size:11px;">${initials(f.studentName)}</span>
+          <span class="student-name">${escapeHtml(f.studentName)}</span>
+        </span>
+        <div class="feedback-answers">
+          ${f.answers.map(a => `
+            <div class="feedback-qa">
+              <span class="feedback-q">${escapeHtml(a.question)}</span>
+              <span class="feedback-a">${escapeHtml(a.answer)}</span>
+            </div>
+          `).join('')}
+        </div>
+        <span class="feedback-time">${escapeHtml(f.timestamp)}</span>
+      </div>
+    `).join('');
+  }
+
+  feedbackSearch.addEventListener('input', renderFeedback);
+  document.getElementById('feedbackShowAllBtn').addEventListener('click', () => {
+    feedbackShowAllActive = !feedbackShowAllActive;
+    renderFeedback();
+  });
+  document.getElementById('refreshFeedbackBtn').addEventListener('click', () => {
+    feedbackSearch.value = '';
+    feedbackShowAllActive = false; // Refresh always returns to the default view
+    loadFeedback();
+  });
+
+  // ============================================================
+  // AUTHENTICATION — PIN login, role-based access, PIN reset
+  // ============================================================
+  let currentUser = null; // { name, role } — lives only in memory, cleared on refresh
+
+  // Show the logo on the login screen immediately (doesn't need login).
+
+  function usersCsvUrl() {
+    return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(USERS_TAB_NAME)}`;
+  }
+
+  function parseUsersCsv(text) {
+    const rows = parseCsvRows(text);
+    const header = rows[0].map(h => h.trim().toLowerCase());
+    const pinIdx = header.indexOf('pin');
+    const nameIdx = header.indexOf('name');
+    const roleIdx = header.indexOf('role');
+
+    return rows.slice(1)
+      .filter(cols => cols[pinIdx] && cols[pinIdx].trim())
+      .map(cols => ({
+        pin: (cols[pinIdx] || '').trim(),
+        name: (cols[nameIdx] || '').trim(),
+        role: (cols[roleIdx] || '').trim().toLowerCase()
+      }));
+  }
+
+  const pinBoxes = Array.from(document.querySelectorAll('.pin-box'));
+  const loginBtn = document.getElementById('loginBtn');
+  const loginStatusBox = document.getElementById('loginStatusBox');
+
+  function getPinValue() {
+    return pinBoxes.map(b => b.value).join('');
+  }
+
+  function clearPinBoxes() {
+    pinBoxes.forEach(b => { b.value = ''; b.classList.remove('filled'); });
+    pinBoxes[0].focus();
+  }
+
+  pinBoxes.forEach((box, i) => {
+    box.addEventListener('input', () => {
+      box.value = box.value.replace(/[^0-9]/g, '').slice(0, 1);
+      box.classList.toggle('filled', box.value !== '');
+      if (box.value && i < pinBoxes.length - 1) {
+        pinBoxes[i + 1].focus();
+      }
+      if (pinBoxes.every(b => b.value !== '')) {
+        attemptLogin();
+      }
+    });
+
+    box.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !box.value && i > 0) {
+        pinBoxes[i - 1].focus();
+      }
+      if (e.key === 'Enter') attemptLogin();
+    });
+
+    box.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const digits = (e.clipboardData.getData('text') || '').replace(/[^0-9]/g, '').split('');
+      digits.slice(0, pinBoxes.length).forEach((d, idx) => {
+        pinBoxes[idx].value = d;
+        pinBoxes[idx].classList.add('filled');
+      });
+      const nextEmpty = pinBoxes.findIndex(b => !b.value);
+      (nextEmpty === -1 ? pinBoxes[pinBoxes.length - 1] : pinBoxes[nextEmpty]).focus();
+      if (pinBoxes.every(b => b.value !== '')) attemptLogin();
+    });
+  });
+
+  function showLoginStatus(kind, message) {
+    loginStatusBox.className = `status show ${kind}`;
+    loginStatusBox.textContent = message;
+  }
+
+  async function attemptLogin() {
+    const pin = getPinValue();
+    if (pin.length < pinBoxes.length) {
+      showLoginStatus('err', 'Enter your full PIN.');
+      return;
+    }
+
+    loginBtn.disabled = true;
+    loginBtn.classList.add('loading');
+    showLoginStatus('pending', 'Checking…');
+
+    try {
+      const res = await fetch(usersCsvUrl());
+      if (!res.ok) throw new Error('Could not reach the Users sheet.');
+      const text = await res.text();
+      const users = parseUsersCsv(text);
+      const match = users.find(u => u.pin === pin);
+
+      if (!match) {
+        showLoginStatus('err', 'Incorrect PIN.');
+        loginBtn.disabled = false;
+        loginBtn.classList.remove('loading');
+        clearPinBoxes();
+        return;
+      }
+
+      currentUser = { name: match.name, role: match.role };
+      onLoginSuccess();
+    } catch (err) {
+      showLoginStatus('err', `Couldn't log in: ${err.message}`);
+      loginBtn.disabled = false;
+      loginBtn.classList.remove('loading');
+    }
+  }
+
+  function onLoginSuccess() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'flex';
+
+    const roleLabel = currentUser.role
+      ? currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1)
+      : 'User';
+    document.getElementById('brandSubLine').textContent =
+      `Yelahanka New Town · Logged in as ${currentUser.name} (${roleLabel})`;
+
+    // Teachers only get Manage Students, Send Broadcast, Demo Bookings —
+    // Feedback is hidden. Developer and Principal see everything, but
+    // ONLY developer sees Settings (webhook URLs stay hidden from everyone else).
+    const isTeacher = currentUser.role === 'teacher';
+    const isDeveloper = currentUser.role === 'developer';
+    tabFeedbackBtn.style.display = isTeacher ? 'none' : 'block';
+    tabSettingsBtn.style.display = isDeveloper ? 'block' : 'none';
+
+    // NOTE: this dashboard now uses the hardcoded WEBHOOK_URLS above as the
+    // reliable source of truth. We intentionally do NOT auto-pull from the
+    // Settings sheet on every login anymore — if the sheet contains any
+    // stale/broken values from earlier testing, silently applying them here
+    // would quietly break things that are actually working. If you want to
+    // change a webhook URL going forward, edit the hardcoded constant at
+    // the top of this script directly (safest), or use the Settings tab's
+    // Save button — that still works and applies immediately to this
+    // session, it just won't auto-load on future logins.
+
+    // Manage Students is the default landing tab for everyone.
+    activateTab(tabStudentsBtn, studentsCard);
+    renderRecentlyAdded();
+  }
+
+  loginBtn.addEventListener('click', attemptLogin);
+
+  // ---- Settings (developer only) ----
+  function settingsCsvUrl() {
+    return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SETTINGS_TAB_NAME)}`;
+  }
+
+  function parseSettingsCsv(text) {
+    const rows = parseCsvRows(text);
+    const header = rows[0].map(h => h.trim().toLowerCase());
+    const keyIdx = header.indexOf('key');
+    const valueIdx = header.indexOf('value');
+
+    const settings = {};
+    rows.slice(1)
+      .filter(cols => cols[keyIdx] && cols[keyIdx].trim())
+      .forEach(cols => {
+        settings[cols[keyIdx].trim()] = (cols[valueIdx] || '').trim();
+      });
+    return settings;
+  }
+
+  async function loadSettingsFromSheet() {
+    try {
+      const res = await fetch(settingsCsvUrl());
+      if (!res.ok) return; // Settings tab may not exist yet — just keep the fallback defaults
+      const text = await res.text();
+      const settings = parseSettingsCsv(text);
+
+      if (settings.WEBHOOK_ORIENTATION_LEVELEND) {
+        WEBHOOK_URLS.parent_orientation = settings.WEBHOOK_ORIENTATION_LEVELEND;
+        WEBHOOK_URLS.level_end_meeting = settings.WEBHOOK_ORIENTATION_LEVELEND;
+      }
+      if (settings.WEBHOOK_PRACTICE_ABSENCE) {
+        WEBHOOK_URLS.home_practice = settings.WEBHOOK_PRACTICE_ABSENCE;
+        WEBHOOK_URLS.absence = settings.WEBHOOK_PRACTICE_ABSENCE;
+      }
+      if (settings.WEBHOOK_HOLIDAY_CLOSURE) {
+        WEBHOOK_URLS.holiday_closure = settings.WEBHOOK_HOLIDAY_CLOSURE;
+      }
+      if (settings.WEBHOOK_MANAGE_STUDENTS) {
+        MANAGE_STUDENTS_WEBHOOK_URL = settings.WEBHOOK_MANAGE_STUDENTS;
+      }
+      if (settings.WEBHOOK_ADMIN_RESET_PIN) {
+        ADMIN_RESET_PIN_WEBHOOK_URL = settings.WEBHOOK_ADMIN_RESET_PIN;
+      }
+    } catch (err) {
+      // Silently keep fallback defaults if the Settings sheet can't be reached
+    }
+  }
+
+  function populateSettingsForm() {
+    document.getElementById('settingOrientationLevelEnd').value = WEBHOOK_URLS.parent_orientation || '';
+    document.getElementById('settingPracticeAbsence').value = WEBHOOK_URLS.home_practice || '';
+    document.getElementById('settingHolidayClosure').value = WEBHOOK_URLS.holiday_closure || '';
+    document.getElementById('settingManageStudents').value = MANAGE_STUDENTS_WEBHOOK_URL || '';
+    document.getElementById('settingAdminResetPin').value = ADMIN_RESET_PIN_WEBHOOK_URL || '';
+  }
+
+  const settingsStatusBox = document.getElementById('settingsStatusBox');
+  function showSettingsStatus(kind, message) {
+    settingsStatusBox.className = `status show ${kind}`;
+    settingsStatusBox.textContent = message;
+  }
+
+  async function saveSetting(key, value) {
+    const res = await fetch(SETTINGS_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, value })
+    });
+    if (!res.ok) throw new Error(`Server responded with ${res.status}`);
+  }
+
+  document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
+    const orientationLevelEnd = document.getElementById('settingOrientationLevelEnd').value.trim();
+    const practiceAbsence = document.getElementById('settingPracticeAbsence').value.trim();
+    const holidayClosure = document.getElementById('settingHolidayClosure').value.trim();
+    const manageStudents = document.getElementById('settingManageStudents').value.trim();
+    const adminResetPin = document.getElementById('settingAdminResetPin').value.trim();
+
+    const btn = document.getElementById('saveSettingsBtn');
+    btn.disabled = true;
+    btn.classList.add('loading');
+    showSettingsStatus('pending', 'Saving…');
+
+    try {
+      await saveSetting('WEBHOOK_ORIENTATION_LEVELEND', orientationLevelEnd);
+      await saveSetting('WEBHOOK_PRACTICE_ABSENCE', practiceAbsence);
+      await saveSetting('WEBHOOK_HOLIDAY_CLOSURE', holidayClosure);
+      await saveSetting('WEBHOOK_MANAGE_STUDENTS', manageStudents);
+      await saveSetting('WEBHOOK_ADMIN_RESET_PIN', adminResetPin);
+
+      // Apply immediately so this session doesn't need a reload
+      WEBHOOK_URLS.parent_orientation = orientationLevelEnd;
+      WEBHOOK_URLS.level_end_meeting = orientationLevelEnd;
+      WEBHOOK_URLS.home_practice = practiceAbsence;
+      WEBHOOK_URLS.absence = practiceAbsence;
+      WEBHOOK_URLS.holiday_closure = holidayClosure;
+      MANAGE_STUDENTS_WEBHOOK_URL = manageStudents;
+      ADMIN_RESET_PIN_WEBHOOK_URL = adminResetPin;
+
+      showSettingsStatus('ok', 'Saved. Everyone opening the dashboard will now use these URLs.');
+    } catch (err) {
+      showSettingsStatus('err', `Couldn't save: ${err.message}`);
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove('loading');
+    }
+  });
+
+  // ---- Admin reset a user's PIN ----
+  document.getElementById('resetPinNew').addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 4);
+  });
+  const adminResetPinStatusBox = document.getElementById('adminResetPinStatusBox');
+  function showAdminResetPinStatus(kind, message) {
+    adminResetPinStatusBox.className = `status show ${kind}`;
+    adminResetPinStatusBox.textContent = message;
+  }
+
+  document.getElementById('adminResetPinBtn').addEventListener('click', async () => {
+    const name = document.getElementById('resetPinName').value.trim();
+    const newPin = document.getElementById('resetPinNew').value.trim();
+
+    if (!name || !newPin) {
+      showAdminResetPinStatus('err', 'Enter both name and new PIN.');
+      return;
+    }
+    if (!/^\d{4}$/.test(newPin)) {
+      showAdminResetPinStatus('err', 'PIN must be exactly 4 digits — the login screen only accepts 4-digit PINs.');
+      return;
+    }
+
+    const btn = document.getElementById('adminResetPinBtn');
+    btn.disabled = true;
+    btn.classList.add('loading');
+    showAdminResetPinStatus('pending', 'Resetting…');
+
+    try {
+      const res = await fetch(ADMIN_RESET_PIN_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, newPin })
+      });
+      if (!res.ok) throw new Error(`Server responded with ${res.status}`);
+      showAdminResetPinStatus('ok', `${name}'s PIN has been reset.`);
+      document.getElementById('resetPinName').value = '';
+      document.getElementById('resetPinNew').value = '';
+    } catch (err) {
+      showAdminResetPinStatus('err', `Couldn't reset: ${err.message}`);
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove('loading');
+    }
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    currentUser = null;
+    clearPinBoxes();
+    showLoginStatus('', '');
+    loginStatusBox.className = 'status';
+    document.getElementById('mainApp').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+  });
+
+  // Register the service worker so browsers offer "Add to Home Screen" /
+  // "Install app" — this is what makes it launch full-screen like a real
+  // app instead of opening inside browser chrome.
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {
+        // Non-fatal — the dashboard works fine without the service worker,
+        // it just won't be installable as a full PWA.
+      });
+    });
+  }
+
+  // ============================================================
+  // BFCACHE FIX — mobile browsers often restore a page from an
+  // in-memory snapshot (bfcache) when you switch away and come back,
+  // instead of actually re-running the page. That snapshot freezes
+  // whatever was on screen at the time (old search filters, old
+  // student/booking/feedback data) and never fetches anything fresh
+  // again on its own. Rather than force a disruptive full reload
+  // (which would also log everyone out, since login lives only in
+  // memory), just re-fetch whichever tab is currently visible.
+  // ============================================================
+  window.addEventListener('pageshow', (event) => {
+    if (!event.persisted) return;
+    if (document.getElementById('mainApp').style.display === 'none') return; // not logged in yet
+
+    if (studentsCard.style.display !== 'none') {
+      if (showingAllStudents) loadManageStudentList();
+      // (recently-added session list doesn't need re-fetching, it's local)
+    } else if (bookingsCard.style.display !== 'none') {
+      loadBookings();
+    } else if (feedbackCard.style.display !== 'none') {
+      feedbackSearch.value = '';
+      loadFeedback();
+    }
+  });
+</script>
+
+</div>
+
+</body>
+</html>
